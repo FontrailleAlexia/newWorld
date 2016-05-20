@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+<link rel="stylesheet" href="styles/styles.css" type="text/css"/>
+</head>
+<body>
+<?php
+####INCLUSION DU HAUT####
+include ('header.php');
+####INCLUSION DU CONNEXION####
+include ('connexion/connexion.php');
+####INCLUSION DES FONCTIONS####
+//include ('mesFonctions.php');
+####INCLUSION DES DATALIST####
+include ('dataList.php');?>
+
+<p class="titre">SAISIE DES LOTS</p>
+<?php
+//#############################################
+########Fonction envoie du formulaire##########
+###############################################
+	echo "<div class='fond_blanc'>";
+	echo "<p class='asterisque'>Tout les champs marqués d'une * sont obligatoires</p>";
+	$today=date("d/m/y");
+
+	echo "<form class='align' name='formulaire' method='POST' action=''>";
+	echo "<fieldset><legend class='legend'>Produit</legend>";
+	echo "<p><label for='categorie'>*Categorie: </label><select name='categorie' class='votre' id='categorie' onchange='updateSelectProduits()'>";
+	//INCLUSION DE LA BASE
+	include "connexion/connexion.php";
+	//Requete d'affichage des surType
+	$reqSurType="select * from surType;";
+	//Exécution de la requête
+	$resultat=mysqli_query($laBase,$reqSurType);
+	//Tant qu'il y a un résultat
+	while($ligne=mysqli_fetch_array($resultat))
+	{
+		//Affichage des surType dans le optgroup
+		?><optgroup label="<?=$ligne["libelleSurType"]?>"><?php
+		//On récupère le no du surType
+		$noSurType=$ligne["no"];
+		//Requete d'affichage des type
+		$reqTypeP="select * from type where noSurType=$noSurType;";
+		//Exécution de la requête
+		$resultat2=mysqli_query($laBase,$reqTypeP);
+		//Tant qu'il y a un résultat
+		while($ligne2=mysqli_fetch_array($resultat2))
+		{
+			$noTypeP=$ligne2["no"];
+			//Affichage du typeP dans la balise option
+			?><option value='<?=$noTypeP?>'><?=$ligne2["libelleType"]?></option><?php
+		}
+	}
+	echo "</select><input type='submit' name='ajoutCategorie' value='Choisir le produit'></form></p><form name='formulaire' method='POST' action=''>";
+	if(isset($_POST['ajoutCategorie']))
+	{
+		echo "<p><label for='produit'>*Produit</label><select name='produit' class='votre' id='produit'>";
+		$noTypeP=$_POST['categorie'];
+		//REQUETE
+		$req="select libelleProd from produit where noType=$noTypeP;";
+		$result=mysqli_query($laBase,$req);
+		while($tab=mysqli_fetch_row($result))
+		{
+			$produit=$tab[0];
+			echo "<option value='<?=$produit?>'";
+			if(isset($_POST['produit']) && $produit==$_POST['produit']) echo 'selected';
+			echo ">";
+			?><?=$produit;
+			echo "</option>";
+		}
+		echo "</select></p>";
+	}
+	echo "</form></p></fieldset>";
+	echo "<form class='align' name='formulaire2' method='POST' action='bonjour.php'>";
+	echo "<p><label for='quantite'>Quantité mis en vente: </label>";
+	echo "<input type='number' class='votre' name='quantite' id='quantite' placeholder='quantité a vendre' value='1'/></p>";
+	echo "<p><label for='unite'>Unité de mesure: </label>";
+	echo "<input type='text' name='unite' class='votre' id='unite' placeholder='kg...' value='kg'/></p>";
+	echo "<p><label for='dateRecolte'>Date de récolte: </label>";
+	echo "<input type='date' class='votre' name='dateRecolte' id='dateRecolte' placeholder='date de recolte' value='$today' required/></p>";
+	echo "<p><label for='modeProduction'>Mode de Production: </label>";
+	echo "<input type='text' name='modeProduction' class='votre' id='modeProduction' placeholder='mode de production' value='' list='modeProductionLot'/></p>";
+	echo "<fieldset><legend class='legend'>Lieu de production</legend>";
+	echo "<p><label for='CP'>Commune : </label>";
+	echo "<input type='text' name='commune' class='votre' id='idCommune' placeholder='Mettre le CP' value='' list='listeDesCommunes' oninput='remplirListeCommune()'/></p>";
+	//echo "<datalist id='listeDesCommunes'></datalist>";
+	//include ("scriptJavaScripts.php");
+	echo "<p><label for='ville'>Ville : </label>";
+	echo "<span class='custom-dropdown custom-dropdown--white'>";
+	echo "<select class='custom-dropdown__select custom-dropdown__select--white'>";
+	$reqCP="select bureauDistributeur, ville from localites order by bureauDistributeur;";
+	//Exécution de la requête
+	$resultat=mysqli_query($laBase,$reqCP);
+	//Tant qu'il y a un résultat
+	while($ligne=mysqli_fetch_array($resultat))
+	{
+		echo '<option value="'.$ligne['ville'].'">'.$ligne['bureauDistributeur'].'</option>';
+	}
+	echo "</select>";
+	echo "</span>";
+	echo "</p>";
+	echo "<p><label for='parcelle'>*Parcelle: </label>";
+	echo "<input type='number' class='votre' name='parcelle' id='parcelle' placeholder='numéro parcelle' value=''></p></fieldset>";
+	echo "<p><label for='dureeConservation'>Durée de conservation: </label>";
+	echo "<input type='number' class='votre' name='dureeConservation' id='dureeConservation' placeholder='durée de conservation' value='1' required/></p>";
+	echo "<p><label for='PU'>Prix unitaire: </label>";
+	echo "<input type='text' class='votre' id='PU' name='prixUnitaire' placeholder='prix unitaire value'/></p>";
+	echo "<fieldset><legend class='legend'>Point de vente</legend>";
+	echo "<p><label for='pointDeVente'>Point de vente: </label>";
+	echo "<input type='text' class='votre' name='pointDeVente' id='pointDeVente' list='listeDesPointsDeVente' placeholder='point de vente' value=''/></p></fieldset>";
+	echo "<p class='envoyer'><input type='submit' value='Envoyer' name='EnregistrerLot'></p></form>";
+	echo "</div>";
+
+
+/*if(!(formulairePoste()))
+{
+####ENVOIE DU FORMULAIRE
+	envoiFormulaire();
+}
+else
+{
+	if(controleFormulaireSaisieLot($tab,$tabErreur))
+	{
+		if(enregistrerBase())
+		{
+			rendreCompte('<p class="OK">Votre produit a bien été mis en vente</p><p class="OK">Afin de valider votre saisie du lot</p><p class="OK">Veuillez consulter vos mails</p><p class="OK">New World vous remercie</p>');
+		}
+		else
+		{
+			rendreCompte('<p class="OK">Nous vous prions de nous excuser,</p><p class="OK">mais un problème est survenu dans l\'enregistrement de votre lot,</p><p class="OK">veuillez recommencer ultérieurement</p>');
+		}
+	}
+	else
+	{
+		envoiFormulaireAvecMessage($tab,$tabErreur);
+	}
+}*/
+
+####INCLUSION DU BAS####
+//include ('footer.php');
+include "footer_rien.php"; ?>
