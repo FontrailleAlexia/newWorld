@@ -1,0 +1,11 @@
+DELETE FROM choisir;
+DELETE FROM localites;
+DELETE FROM lot;
+DELETE FROM pointDeVente;
+DELETE FROM produit;
+DELETE FROM proposerA;
+DELETE FROM question;
+DELETE FROM surType;
+DELETE FROM type;
+DELETE FROM utilisateur;
+DELETE FROM retrait;
