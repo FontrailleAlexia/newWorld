@@ -4,6 +4,7 @@ class PdoOrderManager extends AbstractPdoManager{
 		parent::__construct();
 	}
 
+	// Enregistrer les commandes dans la base de données
 	public function save($basket){
 		$this->PDO->beginTransaction();
 
@@ -20,7 +21,7 @@ class PdoOrderManager extends AbstractPdoManager{
 			$stm->execute();
 
 			$orderId = $this->PDO->lastInsertId();
-			foreach ($basket["lots"] as $productId => $lot) {
+			foreach ($basket["lots"] as $lotId => $lot) {
 				$stm = $this->PDO->prepare("INSERT INTO `orderproduct` (orderId,productId,price,quantity) VALUES (
 					:orderId,
 					:productId,
@@ -28,7 +29,7 @@ class PdoOrderManager extends AbstractPdoManager{
 					:quantity)");	
 
 				$stm->bindValue(':orderId', $orderId);
-				$stm->bindValue(':productId', $productId);
+				$stm->bindValue(':productId', $lot["productId"]);
 				$stm->bindValue(':price', $lot["price"]);
 				$stm->bindValue(':quantity', $lot["quantity"]);
 				$stm->execute();

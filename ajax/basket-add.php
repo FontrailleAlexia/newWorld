@@ -1,6 +1,10 @@
 <?php
 include "../inc/main.php";
 
+/* ############################################
+##### AJOUTER UN LOT DANS LE PANIER ###########
+###############################################*/
+
 $data = ['success' => 'fail', 
 		 'quantity' => 0,
 		 'total' => 0];
@@ -22,6 +26,7 @@ if($userManager->isConnected()){ // Connecter
 					$_SESSION["basket"]["lots"][$id_lot]['price'] = 0;
 					$_SESSION["basket"]["lots"][$id_lot]['name'] = $product->getLibelle();
 					$_SESSION["basket"]["lots"][$id_lot]['quantity'] = 0;
+					$_SESSION["basket"]["lots"][$id_lot]['idProduct'] = $product->getId();
 				}
 
 				$_SESSION["basket"]["lots"][$id_lot]['price'] += $lot->getPrice();
